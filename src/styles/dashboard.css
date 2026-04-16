@@ -1,0 +1,358 @@
+/* ────────────────────────────────────────────────────────────────────────
+   DevHub — Dashboard page.
+
+   Two-pane split: PROJECTS on the left, selected project DETAIL on the right.
+   Borrows title-block layout from shop drawings for the project rows.
+   ──────────────────────────────────────────────────────────────────────── */
+
+.dashboard {
+  display:               grid;
+  grid-template-columns: var(--left-pane-w) 1fr;
+  flex:                  1 1 auto;
+  min-height:            0;
+  overflow:              hidden;
+}
+
+
+/* ── Left pane ─────────────────────────────────────────────────────────── */
+
+.projects-pane {
+  background:     var(--bg-surface);
+  border-right:   1px solid var(--border-default);
+  overflow-y:     auto;
+  display:        flex;
+  flex-direction: column;
+  min-height:     0;
+}
+
+.projects-pane-header {
+  display:          flex;
+  align-items:      center;
+  justify-content:  space-between;
+  padding:          14px 18px 10px;
+  border-bottom:    1px solid var(--border-default);
+}
+
+.projects-pane-header h2 {
+  font-size:      11px;
+  letter-spacing: 0.22em;
+  color:          var(--text-secondary);
+}
+
+.projects-pane-count {
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  color:          var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+
+/* ── Project row — "title block" styling ───────────────────────────────── */
+
+.project-row {
+  display:        grid;
+  grid-template-columns: 14px 1fr auto;
+  align-items:    center;
+  gap:            10px;
+  padding:        0 18px 0 12px;
+  min-height:     56px;
+  border-bottom:  1px solid var(--border-subtle);
+  cursor:         pointer;
+  background:     transparent;
+  transition:     background 80ms linear;
+  position:       relative;
+}
+
+.project-row:hover {
+  background: var(--bg-surface-alt);
+}
+
+.project-row.is-selected {
+  background: var(--accent-soft);
+}
+
+.project-row.is-selected::before {
+  content:      '';
+  position:     absolute;
+  left:         0;
+  top:          0;
+  bottom:       0;
+  width:        2px;
+  background:   var(--accent);
+}
+
+.project-row-indicator {
+  width:         6px;
+  height:        6px;
+  border-radius: 50%;
+  justify-self:  center;
+}
+
+.project-row-indicator.up         { background: var(--status-up); }
+.project-row-indicator.degraded   { background: var(--status-degraded); }
+.project-row-indicator.down       { background: var(--status-down); }
+.project-row-indicator.unknown    { background: var(--status-unknown); }
+.project-row-indicator.none       { background: transparent; border: 1px solid var(--text-dim); }
+
+.project-row-body {
+  display:         flex;
+  flex-direction:  column;
+  gap:             2px;
+  min-width:       0;
+}
+
+.project-row-name {
+  font-family:    var(--font-display);
+  font-size:      14px;
+  font-weight:    500;
+  letter-spacing: 0.06em;
+  color:          var(--text-primary);
+  text-transform: uppercase;
+  white-space:    nowrap;
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+}
+
+.project-row-meta {
+  display:        flex;
+  gap:            10px;
+  font-size:      10px;
+  color:          var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.project-row-meta .sep {
+  color: var(--text-dim);
+}
+
+.project-row-status {
+  font-family:    var(--font-mono);
+  font-size:      10px;
+  font-weight:    600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space:    nowrap;
+}
+
+
+/* ── Right pane ────────────────────────────────────────────────────────── */
+
+.detail-pane {
+  overflow-y:  auto;
+  padding:     32px 40px;
+  min-height:  0;
+}
+
+.detail-empty {
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  height:           100%;
+  color:            var(--text-muted);
+  font-family:      var(--font-display);
+  font-size:        11px;
+  letter-spacing:   0.22em;
+  text-transform:   uppercase;
+}
+
+.detail-empty .marker {
+  display:      inline-block;
+  color:        var(--text-dim);
+  margin-right: 10px;
+}
+
+
+/* ── Detail header ─────────────────────────────────────────────────────── */
+
+.detail-header {
+  display:        flex;
+  flex-direction: column;
+  gap:            4px;
+  padding-bottom: 18px;
+  border-bottom:  1px solid var(--border-default);
+  margin-bottom:  24px;
+}
+
+.detail-header-row {
+  display:          flex;
+  align-items:      baseline;
+  justify-content:  space-between;
+  gap:              16px;
+}
+
+.detail-header h1 {
+  font-size:      26px;
+  letter-spacing: 0.1em;
+}
+
+.detail-header-key {
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  color:          var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.detail-header-desc {
+  color:       var(--text-secondary);
+  font-size:   12px;
+  line-height: 1.6;
+  max-width:   640px;
+  margin-top:  6px;
+}
+
+.detail-header-badges {
+  display:    flex;
+  gap:        8px;
+  margin-top: 8px;
+}
+
+.detail-badge {
+  font-family:    var(--font-display);
+  font-size:      10px;
+  font-weight:    400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding:        3px 8px;
+  border:         1px solid var(--border-strong);
+  color:          var(--text-muted);
+}
+
+
+/* ── Detail fields — reads like title-block cells ──────────────────────── */
+
+.detail-fields {
+  display:                grid;
+  grid-template-columns:  repeat(auto-fit, minmax(160px, 1fr));
+  border-top:             1px solid var(--border-default);
+  border-left:            1px solid var(--border-default);
+  margin-bottom:          32px;
+}
+
+.detail-field {
+  padding:         12px 14px;
+  border-right:    1px solid var(--border-default);
+  border-bottom:   1px solid var(--border-default);
+  display:         flex;
+  flex-direction:  column;
+  gap:             6px;
+  min-height:      64px;
+}
+
+.detail-field-label {
+  font-family:    var(--font-display);
+  font-size:      10px;
+  font-weight:    400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+}
+
+.detail-field-value {
+  font-family:    var(--font-mono);
+  font-size:      13px;
+  color:          var(--text-primary);
+  letter-spacing: 0.02em;
+}
+
+.detail-field-value.dim {
+  color: var(--text-muted);
+}
+
+
+/* ── Detail section ────────────────────────────────────────────────────── */
+
+.detail-section {
+  margin-bottom: 32px;
+}
+
+.detail-section-header {
+  display:          flex;
+  justify-content:  space-between;
+  align-items:      baseline;
+  padding-bottom:   8px;
+  border-bottom:    1px solid var(--border-default);
+  margin-bottom:    12px;
+}
+
+.detail-section-header h2 {
+  font-size:      12px;
+  letter-spacing: 0.22em;
+  color:          var(--text-secondary);
+}
+
+.detail-section-header .count {
+  font-family: var(--font-mono);
+  font-size:   11px;
+  color:       var(--text-muted);
+}
+
+
+/* ── Deploy actions row ────────────────────────────────────────────────── */
+
+.deploy-actions {
+  display:    flex;
+  gap:        8px;
+  flex-wrap:  wrap;
+}
+
+
+/* ── Recent deploys table ──────────────────────────────────────────────── */
+
+.deploys-table {
+  width:           100%;
+  border-collapse: collapse;
+  font-family:     var(--font-mono);
+  font-size:       12px;
+}
+
+.deploys-table th,
+.deploys-table td {
+  text-align:    left;
+  padding:       8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  color:         var(--text-primary);
+}
+
+.deploys-table th {
+  font-family:    var(--font-display);
+  font-size:      10px;
+  font-weight:    400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  border-bottom:  1px solid var(--border-default);
+  padding:        6px 12px;
+}
+
+.deploys-table td.dim { color: var(--text-muted); }
+
+
+/* ── System status strip (top-right) ───────────────────────────────────── */
+
+.system-status-strip {
+  display:      flex;
+  align-items:  center;
+  gap:          20px;
+}
+
+.system-check {
+  display:        flex;
+  align-items:    center;
+  gap:            8px;
+  font-family:    var(--font-display);
+  font-size:      10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+}
+
+.system-check-dot {
+  width:         7px;
+  height:        7px;
+  border-radius: 50%;
+}
+
+.system-check-dot.up        { background: var(--status-up); }
+.system-check-dot.degraded  { background: var(--status-degraded); }
+.system-check-dot.down      { background: var(--status-down); }
+.system-check-dot.unknown   { background: var(--status-unknown); }

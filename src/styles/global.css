@@ -1,0 +1,332 @@
+/* ────────────────────────────────────────────────────────────────────────
+   DevHub — global tokens and element defaults.
+
+   Industrial dark. Oswald for display, JetBrains Mono for data.
+   No gradients, no shadows, no rounded cards. Rectangles and hairlines.
+   ──────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Surface ───────────────────────────────────────────────────────── */
+  --bg-base:          #0e0e0f;
+  --bg-surface:       #18181a;
+  --bg-surface-alt:   #1c1c1f;
+  --bg-elevated:      #1f1f22;
+
+  /* ── Borders (hairlines, sharp) ────────────────────────────────────── */
+  --border-subtle:    #1f1f22;
+  --border-default:   #2a2a2d;
+  --border-strong:    #3a3a3f;
+
+  /* ── Text ──────────────────────────────────────────────────────────── */
+  --text-primary:     #e8e6e2;
+  --text-secondary:   #9a978f;
+  --text-muted:       #5c5a55;
+  --text-dim:         #3f3e3a;
+
+  /* ── Accent — darker orange, used sparingly ────────────────────────── */
+  --accent:           #c94a1a;
+  --accent-soft:      rgba(201, 74, 26, 0.14);
+  --accent-rule:      rgba(201, 74, 26, 0.55);
+  --accent-hover:     #e05a22;
+
+  /* ── Status — desaturated shop-signage ─────────────────────────────── */
+  --status-up:        #7a9b3e;
+  --status-up-soft:   rgba(122, 155, 62, 0.12);
+  --status-degraded:  #d4a017;
+  --status-degraded-soft: rgba(212, 160, 23, 0.12);
+  --status-down:      #c13030;
+  --status-down-soft: rgba(193, 48, 48, 0.12);
+  --status-unknown:   #5c5a55;
+  --status-unknown-soft: rgba(92, 90, 85, 0.12);
+
+  /* ── Type ──────────────────────────────────────────────────────────── */
+  --font-display:     'Oswald', 'Arial Narrow', sans-serif;
+  --font-mono:        'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ── Measure ───────────────────────────────────────────────────────── */
+  --header-h:         52px;
+  --sidebar-w:        160px;
+  --left-pane-w:      340px;
+}
+
+
+* {
+  box-sizing: border-box;
+}
+
+
+html, body, #root {
+  height:  100%;
+  margin:  0;
+  padding: 0;
+}
+
+
+body {
+  background:     var(--bg-base);
+  color:          var(--text-primary);
+  font-family:    var(--font-mono);
+  font-size:      13px;
+  line-height:    1.5;
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+
+  /* Faint blueprint grid — barely visible, just gives surface some tooth */
+  background-image:
+    linear-gradient(to right,  rgba(255, 255, 255, 0.014) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.014) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+
+/* ── Headings — Oswald, uppercase, tracked ─────────────────────────────── */
+
+h1, h2, h3, h4 {
+  margin:         0;
+  font-family:    var(--font-display);
+  font-weight:    500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color:          var(--text-primary);
+}
+
+h1 { font-size: 22px; letter-spacing: 0.08em; }
+h2 { font-size: 15px; letter-spacing: 0.14em; color: var(--text-secondary); font-weight: 400; }
+h3 { font-size: 12px; letter-spacing: 0.16em; color: var(--text-muted);      font-weight: 400; }
+
+
+/* ── Links ─────────────────────────────────────────────────────────────── */
+
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+
+button {
+  font-family: inherit;
+  cursor:      pointer;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  padding:        9px 18px;
+  font-family:    var(--font-display);
+  font-size:      12px;
+  font-weight:    500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border-radius:  0;
+  border:         1px solid transparent;
+  transition:     background 100ms linear, border-color 100ms linear, color 100ms linear;
+}
+
+.btn-primary {
+  background:   var(--accent);
+  color:        #fff;
+  border-color: var(--accent);
+}
+.btn-primary:hover {
+  background:   var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn-secondary {
+  background:   transparent;
+  color:        var(--text-primary);
+  border-color: var(--border-strong);
+}
+.btn-secondary:hover {
+  background:   var(--bg-surface-alt);
+  border-color: var(--text-muted);
+}
+
+.btn-danger {
+  background:   var(--status-down);
+  color:        #fff;
+  border-color: var(--status-down);
+}
+
+
+/* ── Refresh button — small icon, used in page headers ────────────────── */
+
+.refresh-button {
+  background:       transparent;
+  border:           1px solid var(--border-strong);
+  color:            var(--text-muted);
+  width:            28px;
+  height:           28px;
+  padding:          0;
+  display:          inline-flex;
+  align-items:      center;
+  justify-content:  center;
+  transition:       color 100ms linear, border-color 100ms linear, background 100ms linear;
+}
+
+.refresh-button:hover {
+  color:         var(--text-primary);
+  border-color:  var(--text-muted);
+  background:    var(--bg-surface-alt);
+}
+
+.refresh-button.is-spinning svg {
+  animation: spin 800ms linear infinite;
+}
+
+
+/* ── Status tokens (inline, not pills) ─────────────────────────────────── */
+
+.status-token {
+  display:        inline-block;
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  font-weight:    600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.status-token.up        { color: var(--status-up); }
+.status-token.degraded  { color: var(--status-degraded); }
+.status-token.down      { color: var(--status-down); }
+.status-token.unknown   { color: var(--status-unknown); }
+.status-token.queued    { color: var(--accent); }
+.status-token.running   { color: var(--accent-hover); }
+.status-token.success   { color: var(--status-up); }
+.status-token.failed    { color: var(--status-down); }
+
+
+/* ── Labels (small caps, tracked) ──────────────────────────────────────── */
+
+.label {
+  font-family:    var(--font-display);
+  font-size:      10px;
+  font-weight:    400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+}
+
+
+/* ── Loading spinner ───────────────────────────────────────────────────── */
+
+.loading-spinner {
+  display:      flex;
+  align-items:  center;
+  gap:          10px;
+  padding:      24px;
+  color:        var(--text-secondary);
+  font-size:    11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family:  var(--font-display);
+}
+
+.spinner-ring {
+  width:             10px;
+  height:            10px;
+  border:            1px solid var(--border-strong);
+  border-top-color:  var(--accent);
+  border-radius:     50%;
+  animation:         spin 600ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+/* ── Empty state ───────────────────────────────────────────────────────── */
+
+.empty-state {
+  padding:     48px 24px;
+  text-align:  center;
+  color:       var(--text-secondary);
+}
+
+.empty-state h3 {
+  color:         var(--text-primary);
+  font-size:     14px;
+  margin-bottom: 8px;
+  letter-spacing: 0.14em;
+}
+
+.empty-state p {
+  font-size: 12px;
+  margin:    0;
+  color:     var(--text-muted);
+}
+
+
+/* ── Confirm dialog ────────────────────────────────────────────────────── */
+
+.confirm-dialog-backdrop {
+  position:   fixed;
+  inset:      0;
+  background: rgba(0, 0, 0, 0.65);
+  display:    flex;
+  align-items:     center;
+  justify-content: center;
+  z-index:    100;
+}
+
+.confirm-dialog {
+  background:    var(--bg-elevated);
+  border:        1px solid var(--border-strong);
+  border-radius: 0;
+  padding:       24px;
+  min-width:     420px;
+  max-width:     520px;
+}
+
+.confirm-dialog h3 {
+  margin-bottom: 12px;
+  color:         var(--text-primary);
+}
+
+.confirm-dialog p {
+  color:     var(--text-secondary);
+  margin:    0 0 20px;
+  font-size: 12px;
+}
+
+.confirm-dialog-actions {
+  display:          flex;
+  justify-content:  flex-end;
+  gap:              8px;
+}
+
+
+/* ── Hairline rule (used everywhere) ───────────────────────────────────── */
+
+.rule {
+  height:       1px;
+  background:   var(--border-default);
+  border:       none;
+  margin:       0;
+}
+
+.rule.strong { background: var(--border-strong); }
+
+
+/* ── Scrollbars — thin, dim ────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width:  8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

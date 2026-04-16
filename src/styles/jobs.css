@@ -1,0 +1,84 @@
+/* ────────────────────────────────────────────────────────────────────────
+   DevHub — Jobs page + shared deploys table component.
+   ──────────────────────────────────────────────────────────────────────── */
+
+.jobs-page {
+  padding:     28px 40px;
+  overflow-y:  auto;
+  min-height:  0;
+  flex:        1 1 auto;
+}
+
+
+/* ── Filter bar ────────────────────────────────────────────────────────── */
+
+.jobs-filter-bar {
+  display:        flex;
+  align-items:    center;
+  gap:            16px;
+  padding-bottom: 16px;
+  border-bottom:  1px solid var(--border-default);
+  margin-bottom:  20px;
+}
+
+.jobs-filter-bar .label {
+  color: var(--text-muted);
+}
+
+.jobs-filter-select {
+  background:     var(--bg-surface);
+  color:          var(--text-primary);
+  border:         1px solid var(--border-strong);
+  border-radius:  0;
+  padding:        7px 10px;
+  font-family:    var(--font-mono);
+  font-size:      12px;
+  min-width:      220px;
+  cursor:         pointer;
+  transition:     border-color 100ms linear;
+}
+
+.jobs-filter-select:focus {
+  outline:       none;
+  border-color:  var(--accent);
+}
+
+
+/* ── Row hover + click affordance on the shared deploys-table ──────────── */
+
+.deploys-row {
+  cursor:      pointer;
+  transition:  background 80ms linear;
+}
+
+.deploys-row:hover {
+  background: var(--accent-soft);
+}
+
+
+/* ── Mono dim cell — for timestamps ────────────────────────────────────── */
+
+.deploys-table td.mono-dim {
+  color:          var(--text-secondary);
+  white-space:    nowrap;
+}
+
+
+/* ── Compact variant — used inside DetailPane ──────────────────────────── */
+
+.deploys-table.is-compact th,
+.deploys-table.is-compact td {
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
+
+/* ── Count in header ───────────────────────────────────────────────────── */
+
+.jobs-count {
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  color:          var(--text-muted);
+  letter-spacing: 0.05em;
+  margin-left:    auto;
+}

@@ -1,0 +1,403 @@
+/* ────────────────────────────────────────────────────────────────────────
+   DevHub — Deploy modal.
+
+   Three states cycle through the same modal shell:
+     form    → param inputs, validate + submit
+     running → live progress + log tail (2s poll)
+     done    → final summary + view-log link
+   ──────────────────────────────────────────────────────────────────────── */
+
+.deploy-modal-backdrop {
+  position:         fixed;
+  inset:            0;
+  background:       rgba(0, 0, 0, 0.7);
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  z-index:          100;
+}
+
+.deploy-modal {
+  background:    var(--bg-elevated);
+  border:        1px solid var(--border-strong);
+  width:         560px;
+  max-width:     calc(100vw - 40px);
+  max-height:    calc(100vh - 40px);
+  display:       flex;
+  flex-direction: column;
+  overflow:      hidden;
+}
+
+
+/* ── Header ────────────────────────────────────────────────────────────── */
+
+.deploy-modal-header {
+  padding:       16px 20px;
+  border-bottom: 1px solid var(--border-default);
+  display:       flex;
+  align-items:   baseline;
+  justify-content: space-between;
+  gap:           16px;
+}
+
+.deploy-modal-title {
+  font-family:    var(--font-display);
+  font-size:      18px;
+  font-weight:    500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color:          var(--text-primary);
+}
+
+.deploy-modal-subtitle {
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  color:          var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+
+/* ── Body (scrolls when content overflows) ─────────────────────────────── */
+
+.deploy-modal-body {
+  padding:     20px;
+  overflow-y:  auto;
+  flex:        1 1 auto;
+  min-height:  0;
+}
+
+
+/* ── Footer ────────────────────────────────────────────────────────────── */
+
+.deploy-modal-footer {
+  padding:          14px 20px;
+  border-top:       1px solid var(--border-default);
+  display:          flex;
+  justify-content:  space-between;
+  align-items:      center;
+  gap:              8px;
+  flex-shrink:      0;
+}
+
+.deploy-modal-footer-actions {
+  display:  flex;
+  gap:      8px;
+}
+
+
+/* ── Description + meta (shown in form state) ─────────────────────────── */
+
+.deploy-description {
+  color:         var(--text-secondary);
+  font-size:     12px;
+  line-height:   1.6;
+  margin:        0 0 14px;
+}
+
+.deploy-meta {
+  display:        grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  border-top:     1px solid var(--border-default);
+  border-left:    1px solid var(--border-default);
+  margin-bottom:  20px;
+}
+
+.deploy-meta-field {
+  padding:       10px 12px;
+  border-right:  1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.deploy-meta-label {
+  display:        block;
+  font-family:    var(--font-display);
+  font-size:      10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  margin-bottom:  4px;
+}
+
+.deploy-meta-value {
+  font-family:    var(--font-mono);
+  font-size:      12px;
+  color:          var(--text-primary);
+}
+
+
+/* ── Param form ────────────────────────────────────────────────────────── */
+
+.deploy-form {
+  display:         flex;
+  flex-direction:  column;
+  gap:             16px;
+}
+
+.deploy-form-empty {
+  color:          var(--text-muted);
+  font-size:      12px;
+  font-style:     italic;
+  text-align:     center;
+  padding:        12px 0;
+}
+
+.deploy-param {
+  display:         flex;
+  flex-direction:  column;
+  gap:             6px;
+}
+
+.deploy-param-label {
+  display:        flex;
+  align-items:    baseline;
+  justify-content: space-between;
+  font-family:    var(--font-display);
+  font-size:      10px;
+  font-weight:    400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-secondary);
+}
+
+.deploy-param-required {
+  color:          var(--accent);
+  font-size:      11px;
+  letter-spacing: 0.1em;
+}
+
+.deploy-param-input {
+  background:    var(--bg-surface);
+  color:         var(--text-primary);
+  border:        1px solid var(--border-strong);
+  border-radius: 0;
+  padding:       8px 10px;
+  font-family:   var(--font-mono);
+  font-size:     13px;
+  width:         100%;
+  transition:    border-color 100ms linear;
+}
+
+.deploy-param-input:focus {
+  outline:       none;
+  border-color:  var(--accent);
+}
+
+.deploy-param-input::placeholder {
+  color: var(--text-dim);
+}
+
+.deploy-param-input.has-error {
+  border-color: var(--status-down);
+}
+
+.deploy-param-error {
+  font-size:  11px;
+  color:      var(--status-down);
+  font-family: var(--font-mono);
+}
+
+.deploy-param-bool {
+  display:      flex;
+  align-items:  center;
+  gap:          10px;
+  cursor:       pointer;
+}
+
+.deploy-param-bool input {
+  width:         16px;
+  height:        16px;
+  accent-color:  var(--accent);
+  cursor:        pointer;
+}
+
+.deploy-param-bool-label {
+  font-family:    var(--font-mono);
+  font-size:      12px;
+  color:          var(--text-primary);
+}
+
+
+/* ── Error strip (for 409 conflicts etc.) ──────────────────────────────── */
+
+.deploy-error-strip {
+  background:    rgba(193, 48, 48, 0.1);
+  border:        1px solid rgba(193, 48, 48, 0.4);
+  padding:       10px 12px;
+  margin-bottom: 16px;
+  display:       flex;
+  align-items:   center;
+  justify-content: space-between;
+  gap:           12px;
+}
+
+.deploy-error-strip-message {
+  font-family: var(--font-mono);
+  font-size:   12px;
+  color:       var(--status-down);
+}
+
+.deploy-error-strip-action {
+  background:     transparent;
+  border:         1px solid var(--status-down);
+  color:          var(--status-down);
+  font-family:    var(--font-display);
+  font-size:      10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding:        5px 10px;
+  cursor:         pointer;
+  transition:     background 100ms linear;
+  white-space:    nowrap;
+}
+
+.deploy-error-strip-action:hover {
+  background: rgba(193, 48, 48, 0.18);
+}
+
+
+/* ── Running: progress + log tail ──────────────────────────────────────── */
+
+.deploy-running-header {
+  display:        flex;
+  justify-content: space-between;
+  align-items:    baseline;
+  padding-bottom: 10px;
+  border-bottom:  1px solid var(--border-default);
+  margin-bottom:  16px;
+}
+
+.deploy-running-status {
+  font-family:    var(--font-mono);
+  font-size:      12px;
+  font-weight:    600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.deploy-running-elapsed {
+  font-family:    var(--font-mono);
+  font-size:      12px;
+  color:          var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+
+/* Step progress */
+
+.deploy-step-progress {
+  margin-bottom: 16px;
+}
+
+.deploy-step-header {
+  display:          flex;
+  justify-content:  space-between;
+  align-items:      baseline;
+  margin-bottom:    8px;
+}
+
+.deploy-step-counter {
+  font-family:    var(--font-display);
+  font-size:      11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+}
+
+.deploy-step-label {
+  font-family: var(--font-mono);
+  font-size:   12px;
+  color:       var(--text-primary);
+  max-width:   320px;
+  text-align:  right;
+  white-space: nowrap;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+}
+
+.deploy-progress-bar {
+  height:       2px;
+  background:   var(--bg-surface);
+  border:       1px solid var(--border-default);
+  overflow:     hidden;
+}
+
+.deploy-progress-fill {
+  height:       100%;
+  background:   var(--accent);
+  transition:   width 200ms linear;
+}
+
+
+/* Log tail — mono pre, scrolling box */
+
+.deploy-log-tail {
+  background:   var(--bg-base);
+  border:       1px solid var(--border-default);
+  padding:      10px 12px;
+  font-family:  var(--font-mono);
+  font-size:    11px;
+  line-height:  1.6;
+  color:        var(--text-secondary);
+  height:       220px;
+  overflow-y:   auto;
+  white-space:  pre-wrap;
+  word-break:   break-word;
+}
+
+.deploy-log-empty {
+  color:      var(--text-dim);
+  font-style: italic;
+}
+
+.deploy-log-line {
+  display: block;
+  color:   var(--text-secondary);
+}
+
+.deploy-log-line:last-child {
+  color: var(--text-primary);
+}
+
+
+/* ── Done state ────────────────────────────────────────────────────────── */
+
+.deploy-done {
+  display:         flex;
+  flex-direction:  column;
+  gap:             16px;
+}
+
+.deploy-done-summary {
+  padding:       14px 16px;
+  border:        1px solid var(--border-default);
+  display:       grid;
+  grid-template-columns: 1fr 1fr;
+  gap:           12px 20px;
+}
+
+.deploy-done-field-label {
+  display:        block;
+  font-family:    var(--font-display);
+  font-size:      10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  margin-bottom:  3px;
+}
+
+.deploy-done-field-value {
+  font-family: var(--font-mono);
+  font-size:   13px;
+  color:       var(--text-primary);
+}
+
+.deploy-done-error {
+  padding:       10px 12px;
+  background:    rgba(193, 48, 48, 0.08);
+  border:        1px solid rgba(193, 48, 48, 0.3);
+  font-family:   var(--font-mono);
+  font-size:     12px;
+  color:         var(--status-down);
+  white-space:   pre-wrap;
+  word-break:    break-word;
+}

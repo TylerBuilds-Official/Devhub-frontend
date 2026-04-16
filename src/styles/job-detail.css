@@ -1,0 +1,185 @@
+/* ────────────────────────────────────────────────────────────────────────
+   DevHub — Job detail page.
+
+   Lives at /jobs/:deployId. Polls while non-terminal, static when done.
+   Reuses many tokens from dashboard/deploy-modal; this file is just layout.
+   ──────────────────────────────────────────────────────────────────────── */
+
+.job-detail-page {
+  padding:     28px 40px;
+  overflow-y:  auto;
+  min-height:  0;
+  flex:        1 1 auto;
+  display:     flex;
+  flex-direction: column;
+  gap:         24px;
+}
+
+
+/* ── Top strip: breadcrumb + status + elapsed ──────────────────────────── */
+
+.job-detail-breadcrumb {
+  font-family:    var(--font-display);
+  font-size:      10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  display:        flex;
+  gap:            8px;
+  align-items:    center;
+}
+
+.job-detail-breadcrumb a {
+  color: var(--text-muted);
+}
+
+.job-detail-breadcrumb a:hover {
+  color: var(--text-primary);
+}
+
+.job-detail-breadcrumb .sep {
+  color: var(--text-dim);
+}
+
+
+/* ── Hero: status + elapsed + project ──────────────────────────────────── */
+
+.job-detail-hero {
+  display:        flex;
+  align-items:    baseline;
+  justify-content: space-between;
+  gap:            24px;
+  padding-bottom: 16px;
+  border-bottom:  1px solid var(--border-default);
+}
+
+.job-detail-hero-primary {
+  display:        flex;
+  flex-direction: column;
+  gap:            4px;
+}
+
+.job-detail-hero-status {
+  font-family:    var(--font-display);
+  font-size:      36px;
+  font-weight:    600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height:    1;
+}
+
+.job-detail-hero-status.up,
+.job-detail-hero-status.success  { color: var(--status-up); }
+.job-detail-hero-status.degraded { color: var(--status-degraded); }
+.job-detail-hero-status.down,
+.job-detail-hero-status.failed   { color: var(--status-down); }
+.job-detail-hero-status.queued,
+.job-detail-hero-status.running  { color: var(--accent); }
+.job-detail-hero-status.unknown  { color: var(--text-muted); }
+
+.job-detail-hero-sub {
+  font-family: var(--font-mono);
+  font-size:   12px;
+  color:       var(--text-secondary);
+}
+
+.job-detail-hero-right {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     flex-end;
+  gap:             4px;
+}
+
+.job-detail-hero-elapsed {
+  font-family:    var(--font-mono);
+  font-size:      18px;
+  color:          var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.job-detail-hero-elapsed-label {
+  font-family:    var(--font-display);
+  font-size:      10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+}
+
+
+/* ── Running progress (only while non-terminal) ────────────────────────── */
+
+.job-detail-progress {
+  display:         flex;
+  flex-direction:  column;
+  gap:             8px;
+}
+
+
+/* ── Section ───────────────────────────────────────────────────────────── */
+
+.job-detail-section {
+  display:         flex;
+  flex-direction:  column;
+  gap:             10px;
+}
+
+.job-detail-section-header {
+  display:          flex;
+  justify-content:  space-between;
+  align-items:      baseline;
+  padding-bottom:   8px;
+  border-bottom:    1px solid var(--border-default);
+}
+
+.job-detail-section-header h2 {
+  font-size:      12px;
+  letter-spacing: 0.22em;
+  color:          var(--text-secondary);
+}
+
+.job-detail-section-header .count {
+  font-family: var(--font-mono);
+  font-size:   11px;
+  color:       var(--text-muted);
+}
+
+
+/* ── Full-width title-block grid, denser than dashboard's ──────────────── */
+
+.job-detail-fields {
+  display:                grid;
+  grid-template-columns:  repeat(auto-fit, minmax(180px, 1fr));
+  border-top:             1px solid var(--border-default);
+  border-left:            1px solid var(--border-default);
+}
+
+.job-detail-fields .detail-field {
+  padding:       10px 14px;
+  border-right:  1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-default);
+  min-height:    60px;
+}
+
+
+/* ── Error block (failed deploys) ──────────────────────────────────────── */
+
+.job-detail-error {
+  padding:       14px 16px;
+  background:    rgba(193, 48, 48, 0.08);
+  border:        1px solid rgba(193, 48, 48, 0.35);
+  font-family:   var(--font-mono);
+  font-size:     12px;
+  color:         var(--status-down);
+  white-space:   pre-wrap;
+  word-break:    break-word;
+  line-height:   1.6;
+}
+
+
+/* ── Log section — taller than modal ───────────────────────────────────── */
+
+.job-detail-log-tail {
+  /* Reuses .deploy-log-tail base styles; just taller at page scale. */
+  min-height: 320px;
+  height:     40vh;
+}
