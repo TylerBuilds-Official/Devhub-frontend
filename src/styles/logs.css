@@ -1,0 +1,130 @@
+/* ────────────────────────────────────────────────────────────────────────
+   DevHub — Service logs.
+
+   Inline in DetailPane, below Recent deploys. Two segmented toggles stack
+   at the top (component, then stream); log tail below in a near-black
+   viewport with dim line numbers.
+   ──────────────────────────────────────────────────────────────────────── */
+
+.logs-toggles {
+  display:         flex;
+  flex-direction:  column;
+  gap:             8px;
+  margin-bottom:   12px;
+}
+
+.logs-toggle-row {
+  display:      flex;
+  align-items:  center;
+  gap:          10px;
+}
+
+.logs-toggle-label {
+  font-family:    var(--font-display);
+  font-size:      10px;
+  font-weight:    400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  min-width:      70px;
+}
+
+.logs-segmented {
+  display:       inline-flex;
+  border:        1px solid var(--border-strong);
+}
+
+.logs-segment {
+  background:     transparent;
+  color:          var(--text-secondary);
+  border:         none;
+  border-right:   1px solid var(--border-strong);
+  padding:        6px 14px;
+  font-family:    var(--font-display);
+  font-size:      11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor:         pointer;
+  transition:     background 80ms linear, color 80ms linear;
+}
+
+.logs-segment:last-child {
+  border-right: none;
+}
+
+.logs-segment:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface-alt);
+}
+
+.logs-segment.is-active {
+  background:   var(--accent-soft);
+  color:        var(--text-primary);
+  border-right: 1px solid var(--border-strong);
+}
+
+.logs-segment.is-active:last-child {
+  border-right: none;
+}
+
+
+/* ── Log viewport — terminal-black, not --bg-base ──────────────────────── */
+
+.logs-viewport {
+  background:    #080808;
+  border:        1px solid var(--border-default);
+  font-family:   var(--font-mono);
+  font-size:     11px;
+  line-height:   1.55;
+  color:         var(--text-secondary);
+  height:        260px;
+  overflow-y:    auto;
+  white-space:   pre;
+  padding:       8px 0;
+}
+
+.logs-empty {
+  color:      var(--text-dim);
+  font-style: italic;
+  padding:    14px 16px;
+}
+
+.logs-missing {
+  color:      var(--status-degraded);
+  padding:    14px 16px;
+  font-family: var(--font-mono);
+  font-size:   11px;
+}
+
+.logs-row {
+  display:         grid;
+  grid-template-columns: 52px 1fr;
+  gap:             12px;
+  padding:         0 12px 0 0;
+}
+
+.logs-row-number {
+  color:           var(--text-dim);
+  text-align:      right;
+  user-select:     none;
+  padding-right:   8px;
+  border-right:    1px solid var(--border-subtle);
+}
+
+.logs-row-content {
+  color:        var(--text-primary);
+  white-space:  pre-wrap;
+  word-break:   break-word;
+}
+
+.logs-row:hover .logs-row-content {
+  color: var(--accent-hover);
+}
+
+.logs-footer-path {
+  font-family: var(--font-mono);
+  font-size:   10px;
+  color:       var(--text-dim);
+  padding:     6px 2px 0;
+  word-break:  break-all;
+}

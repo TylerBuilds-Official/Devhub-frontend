@@ -1,8 +1,11 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ListChecks } from 'lucide-react'
+import { LayoutDashboard, ListChecks, Users } from 'lucide-react'
+
+import { useIsAdmin } from '../../auth/MeContext'
 
 
 export default function Sidebar() {
+  const isAdmin = useIsAdmin()
 
   return (
     <nav className="app-sidebar">
@@ -21,6 +24,14 @@ export default function Sidebar() {
             <span>Jobs</span>
           </NavLink>
         </li>
+        {isAdmin && (
+          <li>
+            <NavLink to="/users">
+              <Users size={16} />
+              <span>Users</span>
+            </NavLink>
+          </li>
+        )}
       </ul>
     </nav>
   )

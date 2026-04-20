@@ -5,11 +5,13 @@
  * to DevHubAPI at :8766). In preview/prod, set VITE_API_URL to the deployed
  * DevHub API base URL.
  *
- * No auth yet — getAuthHeaders() is a stub that returns {} today. When MSAL
- * lands, this is the only place that changes: acquire the token silently and
- * return it as a Bearer header. Every resource module is already routed
- * through these wrappers so they pick it up for free.
+ * Every request goes out with a Bearer token acquired from MSAL. On 401
+ * we retry once after forcing a fresh interactive token — covers cases
+ * where the cached token has been revoked/rotated but MSAL hasn't caught up.
  */
+import { acquireAccessToken } from '../auth/acquireToken'
+import { emitSessionExpired } from '../auth/sessionBus'
+import { msalInstance }       from '../auth/msalInstance'
 
 
 const BASE_URL = import.meta.env.VITE_API_URL
@@ -31,10 +33,16 @@ export class ApiError extends Error {
 
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
-  // Stub — returns empty headers until MSAL is wired in.
-  // When auth lands, acquire a silent token here and return
-  // { Authorization: `Bearer ${token}` }.
-  return {}
+  try {
+    const token = await acquireAccessToken()
+    return { Authorization: `Bearer ${token}` }
+  }
+  catch {
+    // No signed-in account yet — let the call go out unauthenticated
+    // and surface the 401 to the caller. This happens during the brief
+    // window before AuthGate finishes its boot.
+    return {}
+  }
 }
 
 
@@ -48,9 +56,39 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 
+async function withAuthRetry<T>(run: (headers: Record<string, string>) => Promise<Response>): Promise<T> {
+  let response = await run(await getAuthHeaders())
+
+  if (response.status === 401) {
+    // Token might be stale — force a silent reacquire and retry once.
+    try {
+      const fresh = await acquireAccessToken()
+      response    = await run({ Authorization: `Bearer ${fresh}` })
+    }
+    catch {
+      // Fall through — retry failed; session-expired path below handles it.
+    }
+
+    if (response.status === 401) {
+      // The freshly-acquired token was also rejected. MSAL's cache is
+      // out of sync with reality (token revoked, backend key rotation,
+      // or the user was removed from UserRoles). Scrub MSAL state and
+      // signal AuthGate to prompt a full re-auth.
+      const account = msalInstance.getActiveAccount()
+      if (account) {
+        await msalInstance.clearCache({ account })
+        msalInstance.setActiveAccount(null)
+      }
+      emitSessionExpired()
+    }
+  }
+
+  return handleResponse<T>(response)
+}
+
+
 export async function get<T>(path: string, params?: Record<string, string | number>): Promise<T> {
-  const url  = new URL(`${BASE_URL}${path}`, window.location.origin)
-  const auth = await getAuthHeaders()
+  const url = new URL(`${BASE_URL}${path}`, window.location.origin)
 
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
@@ -58,58 +96,42 @@ export async function get<T>(path: string, params?: Record<string, string | numb
     })
   }
 
-  const response = await fetch(url.toString(), {
-    headers: { ...auth },
-  })
-
-  return handleResponse<T>(response)
+  return withAuthRetry<T>(headers => fetch(url.toString(), { headers }))
 }
 
 
 export async function post<T>(path: string, body: FormData | Record<string, unknown>): Promise<T> {
   const isFormData = body instanceof FormData
-  const auth       = await getAuthHeaders()
 
-  const response = await fetch(`${BASE_URL}${path}`, {
+  return withAuthRetry<T>(headers => fetch(`${BASE_URL}${path}`, {
     method:  'POST',
-    headers: isFormData ? { ...auth } : { 'Content-Type': 'application/json', ...auth },
+    headers: isFormData ? headers : { 'Content-Type': 'application/json', ...headers },
     body:    isFormData ? body : JSON.stringify(body),
-  })
-
-  return handleResponse<T>(response)
+  }))
 }
 
 
 export async function patch<T>(path: string, body: Record<string, unknown>): Promise<T> {
-  const auth     = await getAuthHeaders()
-  const response = await fetch(`${BASE_URL}${path}`, {
+  return withAuthRetry<T>(headers => fetch(`${BASE_URL}${path}`, {
     method:  'PATCH',
-    headers: { 'Content-Type': 'application/json', ...auth },
+    headers: { 'Content-Type': 'application/json', ...headers },
     body:    JSON.stringify(body),
-  })
-
-  return handleResponse<T>(response)
+  }))
 }
 
 
 export async function put<T>(path: string, body: Record<string, unknown>): Promise<T> {
-  const auth     = await getAuthHeaders()
-  const response = await fetch(`${BASE_URL}${path}`, {
+  return withAuthRetry<T>(headers => fetch(`${BASE_URL}${path}`, {
     method:  'PUT',
-    headers: { 'Content-Type': 'application/json', ...auth },
+    headers: { 'Content-Type': 'application/json', ...headers },
     body:    JSON.stringify(body),
-  })
-
-  return handleResponse<T>(response)
+  }))
 }
 
 
 export async function del_<T>(path: string): Promise<T> {
-  const auth     = await getAuthHeaders()
-  const response = await fetch(`${BASE_URL}${path}`, {
+  return withAuthRetry<T>(headers => fetch(`${BASE_URL}${path}`, {
     method:  'DELETE',
-    headers: { ...auth },
-  })
-
-  return handleResponse<T>(response)
+    headers,
+  }))
 }

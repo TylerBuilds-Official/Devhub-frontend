@@ -1,0 +1,150 @@
+/* ────────────────────────────────────────────────────────────────────────
+   DevHub — sign-in screen + user chip.
+   ──────────────────────────────────────────────────────────────────────── */
+
+
+.signin-screen {
+  position:        fixed;
+  inset:           0;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  background:      var(--bg-base);
+  z-index:         1000;
+}
+
+.signin-card {
+  background:       var(--bg-surface);
+  border:           1px solid var(--border-strong);
+  padding:          48px 56px;
+  min-width:        420px;
+  max-width:        520px;
+  display:          flex;
+  flex-direction:   column;
+  align-items:      flex-start;
+  gap:              20px;
+}
+
+.signin-card h1 {
+  font-size:      28px;
+  letter-spacing: 0.12em;
+  margin:         0;
+}
+
+.signin-subtitle {
+  font-family:    var(--font-display);
+  font-size:      11px;
+  font-weight:    400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  margin:         -12px 0 12px 0;
+}
+
+.signin-button {
+  width:      100%;
+  padding:    12px 20px;
+  margin-top: 4px;
+}
+
+.signin-error {
+  width:      100%;
+  margin-top: 8px;
+  padding:    12px 14px;
+  background: var(--status-down-soft);
+  border:     1px solid var(--status-down);
+  color:      var(--text-primary);
+}
+
+.signin-error p {
+  margin:    6px 0 0;
+  font-size: 12px;
+  word-break: break-word;
+}
+
+
+/* ── User chip in the header ──────────────────────────────────────────── */
+
+.user-chip {
+  position:        relative;
+  display:         inline-flex;
+  align-items:     center;
+  gap:             10px;
+  padding:         6px 12px;
+  background:      transparent;
+  border:          1px solid var(--border-strong);
+  color:           var(--text-primary);
+  font-family:     var(--font-mono);
+  font-size:       12px;
+  letter-spacing:  0;
+  text-transform:  none;
+  cursor:          pointer;
+  transition:      border-color 100ms linear, background 100ms linear;
+}
+
+.user-chip:hover {
+  border-color: var(--text-muted);
+  background:   var(--bg-surface-alt);
+}
+
+.user-chip-role {
+  font-family:    var(--font-display);
+  font-size:      10px;
+  font-weight:    500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color:          var(--accent);
+  padding-left:   10px;
+  border-left:    1px solid var(--border-strong);
+}
+
+.user-chip-role.viewer {
+  color: var(--text-muted);
+}
+
+.user-menu {
+  position:       absolute;
+  top:            calc(100% + 6px);
+  right:          0;
+  min-width:      220px;
+  background:     var(--bg-elevated);
+  border:         1px solid var(--border-strong);
+  padding:        12px 14px;
+  display:        flex;
+  flex-direction: column;
+  gap:            10px;
+  z-index:        50;
+}
+
+.user-menu-info {
+  display:        flex;
+  flex-direction: column;
+  gap:            2px;
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  color:          var(--text-secondary);
+  word-break:     break-all;
+}
+
+.user-menu-info strong {
+  color:          var(--text-primary);
+  font-weight:    500;
+}
+
+.user-menu button {
+  background:     transparent;
+  border:         1px solid var(--border-strong);
+  color:          var(--text-primary);
+  padding:        6px 10px;
+  font-family:    var(--font-display);
+  font-size:      11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition:     border-color 100ms linear, background 100ms linear, color 100ms linear;
+}
+
+.user-menu button:hover {
+  background:     var(--status-down-soft);
+  color:          var(--status-down);
+  border-color:   var(--status-down);
+}

@@ -1,0 +1,57 @@
+/* ────────────────────────────────────────────────────────────────────────
+   DevHub — skeleton loading primitives.
+   ──────────────────────────────────────────────────────────────────────── */
+
+
+.skeleton-bar,
+.skeleton-block {
+  display:          inline-block;
+  background:       var(--bg-surface-alt);
+  background-image: linear-gradient(
+    90deg,
+    var(--bg-surface-alt) 0%,
+    var(--bg-elevated)    40%,
+    var(--bg-surface-alt) 80%
+  );
+  background-size:  200% 100%;
+  animation:        skeleton-shimmer 1400ms linear infinite;
+  border-radius:    0;
+  vertical-align:   middle;
+}
+
+
+.skeleton-block {
+  display: block;
+}
+
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+
+/* ── Project-row skeleton ──────────────────────────────────────────────── */
+
+.project-row-skeleton {
+  cursor: default;
+}
+
+.project-row-skeleton:hover {
+  background: transparent;
+}
+
+.skeleton-dot {
+  width:         6px;
+  height:        6px;
+  border-radius: 50%;
+  justify-self:  center;
+}
+
+
+/* ── Table-row skeleton ────────────────────────────────────────────────── */
+
+.skeleton-tr td {
+  padding:        12px;
+  border-bottom:  1px solid var(--border-subtle);
+}

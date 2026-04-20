@@ -1,7 +1,6 @@
 import { useState }          from 'react'
 
 import Header                from '../components/global/Header'
-import LoadingSpinner        from '../components/global/LoadingSpinner'
 import EmptyState            from '../components/global/EmptyState'
 import RefreshButton         from '../components/global/RefreshButton'
 import JobsTable             from '../components/jobs/JobsTable'
@@ -62,14 +61,16 @@ export default function JobsPage() {
         </div>
 
         {/* ── Body ─────────────────────────────────────────────────── */}
-        {loading && !jobsData && <LoadingSpinner message="Loading jobs..." />}
-
         {error && !jobsData && (
           <EmptyState title="Couldn't load jobs" message={error} />
         )}
 
-        {jobsData && (
-          <JobsTable jobs={jobs} showProject={!projectFilter} />
+        {!error && (
+          <JobsTable
+            jobs={jobs}
+            showProject={!projectFilter}
+            loading={loading && !jobsData}
+          />
         )}
       </div>
     </>

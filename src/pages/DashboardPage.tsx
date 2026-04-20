@@ -2,11 +2,12 @@ import { useCallback }              from 'react'
 import { useNavigate, useParams }   from 'react-router-dom'
 
 import Header              from '../components/global/Header'
-import LoadingSpinner      from '../components/global/LoadingSpinner'
 import EmptyState          from '../components/global/EmptyState'
 import RefreshButton       from '../components/global/RefreshButton'
+import { ProjectRowSkeleton } from '../components/global/Skeleton'
 import ProjectRow          from '../components/dashboard/ProjectRow'
 import DetailPane          from '../components/dashboard/DetailPane'
+import ProjectCards        from '../components/dashboard/ProjectCards'
 import SystemStatusStrip   from '../components/dashboard/SystemStatusStrip'
 import { useApi }          from '../hooks/useApi'
 import { getProjects }     from '../api/projects'
@@ -33,11 +34,10 @@ export default function DashboardPage() {
 
   const projects = data?.projects ?? []
 
-  // URL is the source of truth for selection. If the URL key doesn't match
-  // any project, fall back silently to the first project so we never show a
-  // broken state on a stale/shared link.
-  const urlMatches   = projects.find(p => p.key === projectKey) ?? null
-  const effective    = urlMatches ?? projects[0] ?? null
+  // URL is the source of truth for selection. `/` (no projectKey) renders
+  // the empty-state picker instead of auto-selecting the first project —
+  // gives the user a wider view of everything before they commit to one.
+  const effective    = projects.find(p => p.key === projectKey) ?? null
   const effectiveKey = effective?.key ?? null
 
   const handleSelect = useCallback((key: string) => {
@@ -51,13 +51,11 @@ export default function DashboardPage() {
         <SystemStatusStrip />
       </Header>
 
-      {loading && !data && <LoadingSpinner message="Loading projects..." />}
-
       {error && !data && (
         <EmptyState title="Couldn't load projects" message={error} />
       )}
 
-      {data && (
+      {(data || loading) && !error && (
         <div className="dashboard">
 
           {/* ── Left pane ─────────────────────────────────────────── */}
@@ -65,12 +63,13 @@ export default function DashboardPage() {
             <div className="projects-pane-header">
               <h2>Projects</h2>
               <span className="projects-pane-count">
-                {projects.length.toString().padStart(2, '0')}
+                {data ? projects.length.toString().padStart(2, '0') : '—'}
               </span>
             </div>
 
             <div>
-              {projects.map(p => (
+              {!data && <ProjectRowSkeleton rows={5} />}
+              {data && projects.map(p => (
                 <ProjectRow
                   key={p.key}
                   project={p}
@@ -84,9 +83,11 @@ export default function DashboardPage() {
           {/* ── Right pane ────────────────────────────────────────── */}
           {effective ? (
             <DetailPane project={effective} />
+          ) : data ? (
+            <ProjectCards projects={projects} onSelect={handleSelect} />
           ) : (
             <div className="detail-empty">
-              <span className="marker">—</span> select a project
+              <span className="marker">—</span>
             </div>
           )}
         </div>

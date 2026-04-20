@@ -1,0 +1,197 @@
+/* ────────────────────────────────────────────────────────────────────────
+   DevHub — Users admin page.
+   ──────────────────────────────────────────────────────────────────────── */
+
+
+.users-page {
+  padding: 20px 32px 48px;
+}
+
+
+/* ── Add-user form ─────────────────────────────────────────────────────── */
+
+.users-add-form {
+  margin-bottom: 28px;
+  padding:       18px 20px;
+  border:        1px solid var(--border-default);
+  background:    var(--bg-surface);
+}
+
+.users-add-form-fields {
+  display:      flex;
+  gap:          14px;
+  align-items:  flex-end;
+  flex-wrap:    wrap;
+}
+
+.users-add-field {
+  display:         flex;
+  flex-direction:  column;
+  gap:             6px;
+  min-width:       0;
+}
+
+.users-add-field-grow {
+  flex: 1;
+  min-width: 200px;
+}
+
+.users-add-field input,
+.users-add-field select {
+  font-family:    var(--font-mono);
+  font-size:      13px;
+  background:     var(--bg-base);
+  border:         1px solid var(--border-strong);
+  color:          var(--text-primary);
+  padding:        8px 10px;
+  border-radius:  0;
+  min-width:      240px;
+}
+
+.users-add-field-grow input {
+  min-width: 0;
+  width:     100%;
+}
+
+.users-add-field input:focus,
+.users-add-field select:focus {
+  outline:      none;
+  border-color: var(--accent);
+}
+
+.users-add-form button {
+  display:     inline-flex;
+  align-items: center;
+  gap:         6px;
+}
+
+.users-form-error {
+  margin-top: 10px;
+  padding:    8px 10px;
+  background: var(--status-down-soft);
+  border:     1px solid var(--status-down);
+  color:      var(--text-primary);
+  font-size:  12px;
+}
+
+
+/* ── User table ────────────────────────────────────────────────────────── */
+
+.users-table {
+  width:           100%;
+  border-collapse: collapse;
+  font-family:     var(--font-mono);
+  font-size:       12px;
+}
+
+.users-table thead th {
+  text-align:     left;
+  font-family:    var(--font-display);
+  font-size:      10px;
+  font-weight:    400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  padding:        10px 12px;
+  border-bottom:  1px solid var(--border-strong);
+}
+
+.users-table tbody td {
+  padding:       12px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+.users-table tbody tr:hover {
+  background: var(--bg-surface-alt);
+}
+
+.users-table tbody tr.is-self td:first-child {
+  border-left: 2px solid var(--accent);
+  padding-left: 10px;
+}
+
+.users-self-marker {
+  margin-left:    8px;
+  padding:        1px 6px;
+  font-family:    var(--font-display);
+  font-size:      9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color:          var(--accent);
+  border:         1px solid var(--accent-rule);
+}
+
+.users-dim {
+  color: var(--text-muted);
+}
+
+.users-notes {
+  max-width:     360px;
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.users-role-select {
+  font-family:    var(--font-display);
+  font-size:      11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background:     transparent;
+  border:         1px solid var(--border-strong);
+  padding:        4px 8px;
+  color:          var(--text-primary);
+  border-radius:  0;
+}
+
+.users-role-select:focus {
+  outline:      none;
+  border-color: var(--accent);
+}
+
+.users-role-select.admin {
+  color: var(--accent);
+}
+
+.users-role-select:disabled {
+  opacity: 0.7;
+  cursor:  not-allowed;
+}
+
+.users-row-actions {
+  text-align:  right;
+  white-space: nowrap;
+}
+
+.users-delete-btn {
+  background:       transparent;
+  border:           1px solid var(--border-strong);
+  color:            var(--text-muted);
+  width:            28px;
+  height:           28px;
+  padding:          0;
+  display:          inline-flex;
+  align-items:      center;
+  justify-content:  center;
+  transition:       color 100ms linear, border-color 100ms linear, background 100ms linear;
+}
+
+.users-delete-btn:hover:not(:disabled) {
+  color:        var(--status-down);
+  border-color: var(--status-down);
+  background:   var(--status-down-soft);
+}
+
+.users-delete-btn:disabled {
+  opacity: 0.4;
+  cursor:  not-allowed;
+}
+
+.users-row-error {
+  display:      inline-block;
+  margin-right: 8px;
+  font-family:  var(--font-mono);
+  font-size:    11px;
+  color:        var(--status-down);
+}

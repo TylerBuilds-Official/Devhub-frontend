@@ -1,11 +1,14 @@
 import { useState }                  from 'react'
 
 import { useApi }                    from '../../hooks/useApi'
+import { useIsAdmin }                from '../../auth/MeContext'
 import { getUpstreamApps }           from '../../api/upstream'
 import { getJobs }                   from '../../api/jobs'
 import { absoluteTime, relativeTime } from '../../utils/time'
 import JobsTable                     from '../jobs/JobsTable'
 import DeployModal                   from '../deploy/DeployModal'
+import ServiceLogs                   from '../logs/ServiceLogs'
+import PipelineDetails               from './PipelineDetails'
 import type { ProjectInfo }          from '../../types/project'
 import type { PipelineInfo, UpstreamAppInfo } from '../../types/upstream'
 
@@ -15,18 +18,21 @@ interface DetailPaneProps {
 }
 
 
-function Field({ label, value, dim = false }: { label: string, value: string, dim?: boolean }) {
+function Field({ label, value, dim = false, wide = false, full = false }: { label: string, value: string, dim?: boolean, wide?: boolean, full?: boolean }) {
+
+  const widthCls = full ? 'detail-field--full' : wide ? 'detail-field--wide' : ''
 
   return (
-    <div className="detail-field">
+    <div className={`detail-field ${widthCls}`}>
       <span className="detail-field-label">{label}</span>
-      <span className={`detail-field-value ${dim ? 'dim' : ''}`}>{value}</span>
+      <span className={`detail-field-value ${dim ? 'dim' : ''}`} title={value}>{value}</span>
     </div>
   )
 }
 
 
 export default function DetailPane({ project }: DetailPaneProps) {
+  const isAdmin = useIsAdmin()
   const { data: appsData } = useApi(() => getUpstreamApps(), [])
 
   const { data: recentDeploysData, refetch: refetchRecent } = useApi(
@@ -81,7 +87,7 @@ export default function DetailPane({ project }: DetailPaneProps) {
       </header>
 
       {/* ── Title-block fields ─────────────────────────────────────── */}
-      <div className="detail-fields">
+      <div className="detail-fields detail-fields--title">
         <div className="detail-field">
           <span className="detail-field-label">Status</span>
           <span className={`status-token ${statusCls}`} style={{ fontSize: 13 }}>
@@ -105,23 +111,26 @@ export default function DetailPane({ project }: DetailPaneProps) {
           label="Health URL"
           value={project.health_url ?? 'none'}
           dim={!project.health_url}
+          wide
         />
 
         <Field
           label="Repo"
           value={project.repo ?? 'no repo linked'}
           dim={!project.repo}
+          wide
         />
 
         <Field
           label="UpdateSuite"
           value={project.updatesuite_app ?? 'no pipelines'}
           dim={!project.updatesuite_app}
+          full
         />
       </div>
 
-      {/* ── Deploy actions ─────────────────────────────────────────── */}
-      {upstreamApp && upstreamApp.pipelines.length > 0 && (
+      {/* ── Deploy actions (admin only) ────────────────────────────── */}
+      {isAdmin && upstreamApp && upstreamApp.pipelines.length > 0 && (
         <section className="detail-section">
           <div className="detail-section-header">
             <h2>Deploy</h2>
@@ -131,12 +140,13 @@ export default function DetailPane({ project }: DetailPaneProps) {
           </div>
 
           <div className="deploy-actions">
-            {upstreamApp.pipelines.map(p => (
+            {upstreamApp.pipelines.map((p, idx) => (
               <button
                 key={p.key}
-                className="btn-primary"
+                className="btn-primary deploy-button"
                 title={p.description}
                 onClick={() => setActivePipeline(p)}
+                style={{ animationDelay: `${idx * 60}ms` }}
               >
                 {p.display_name}
               </button>
@@ -154,6 +164,12 @@ export default function DetailPane({ project }: DetailPaneProps) {
 
         <JobsTable jobs={recentDeploys} showProject={false} compact />
       </section>
+
+      {/* ── Pipeline reference (from UpdateSuite step docstrings) ──── */}
+      {upstreamApp && <PipelineDetails upstreamApp={upstreamApp} />}
+
+      {/* ── Service logs (renders nothing if project.logs is absent) ── */}
+      <ServiceLogs project={project} />
 
       {/* ── Health check snapshot ──────────────────────────────────── */}
       {health && (

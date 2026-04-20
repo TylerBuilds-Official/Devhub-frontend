@@ -1,4 +1,5 @@
 import { useNavigate }      from 'react-router-dom'
+import { TableRowSkeleton } from '../global/Skeleton'
 import { relativeTime }     from '../../utils/time'
 import type { JobSummary }  from '../../types/job'
 
@@ -7,6 +8,7 @@ interface JobsTableProps {
   jobs:          JobSummary[]
   showProject?:  boolean    // hide when rendered inside a single-project context
   compact?:      boolean    // drop padding + hide triggered-by for inline use
+  loading?:      boolean    // render skeleton rows while the first fetch is in-flight
 }
 
 
@@ -15,31 +17,10 @@ interface JobsTableProps {
  * (project-scoped). Toggle `showProject` off when rendering inside a single
  * project's detail pane.
  */
-export default function JobsTable({ jobs, showProject = true, compact = false }: JobsTableProps) {
+export default function JobsTable({ jobs, showProject = true, compact = false, loading = false }: JobsTableProps) {
   const navigate = useNavigate()
 
-  if (jobs.length === 0) {
-    return (
-      <table className={`deploys-table ${compact ? 'is-compact' : ''}`}>
-        <thead>
-          <tr>
-            <th>When</th>
-            {showProject && <th>Project</th>}
-            <th>Pipeline</th>
-            <th>Status</th>
-            {!compact && <th>By</th>}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="dim" colSpan={showProject ? (compact ? 4 : 5) : (compact ? 3 : 4)}>
-              No deploys yet.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    )
-  }
+  const cols = (showProject ? 1 : 0) + (compact ? 0 : 1) + 3
 
   return (
     <table className={`deploys-table ${compact ? 'is-compact' : ''}`}>
@@ -53,7 +34,15 @@ export default function JobsTable({ jobs, showProject = true, compact = false }:
         </tr>
       </thead>
       <tbody>
-        {jobs.map(job => (
+        {loading && <TableRowSkeleton rows={compact ? 3 : 6} columns={cols} />}
+
+        {!loading && jobs.length === 0 && (
+          <tr>
+            <td className="dim" colSpan={cols}>No deploys yet.</td>
+          </tr>
+        )}
+
+        {!loading && jobs.map(job => (
           <tr
             key={job.deploy_id}
             className="deploys-row"

@@ -1,0 +1,67 @@
+/* ────────────────────────────────────────────────────────────────────────
+   DevHub — error boundary fallback.
+   ──────────────────────────────────────────────────────────────────────── */
+
+
+.error-boundary {
+  position:        fixed;
+  inset:           0;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  background:      var(--bg-base);
+  padding:         32px;
+  z-index:         500;
+}
+
+
+.error-boundary-card {
+  background:     var(--bg-surface);
+  border:         1px solid var(--border-strong);
+  border-left:    3px solid var(--status-down);
+  padding:        36px 40px;
+  min-width:      460px;
+  max-width:      620px;
+  display:        flex;
+  flex-direction: column;
+  gap:            14px;
+}
+
+
+.error-boundary-card h1 {
+  font-size:      22px;
+  letter-spacing: 0.1em;
+  margin:         0;
+}
+
+
+.error-boundary-subtitle {
+  margin:       0;
+  font-size:    12px;
+  color:        var(--text-secondary);
+  line-height:  1.55;
+}
+
+
+.error-boundary-detail {
+  margin:         8px 0 0;
+  padding:        12px 14px;
+  background:     var(--bg-base);
+  border:         1px solid var(--border-default);
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  color:          var(--status-down);
+  white-space:    pre-wrap;
+  word-break:     break-word;
+  max-height:     160px;
+  overflow:       auto;
+}
+
+
+.error-boundary-button {
+  align-self:   flex-start;
+  display:      inline-flex;
+  align-items:  center;
+  gap:          6px;
+  margin-top:   8px;
+}
