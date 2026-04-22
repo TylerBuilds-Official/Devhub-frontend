@@ -122,7 +122,7 @@ export default function DetailPane({ project }: DetailPaneProps) {
         />
 
         <Field
-          label="UpdateSuite"
+          label="UpdateSuite - TEST!"
           value={project.updatesuite_app ?? 'no pipelines'}
           dim={!project.updatesuite_app}
           full
