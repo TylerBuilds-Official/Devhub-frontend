@@ -8,7 +8,7 @@
  *   - /me returned 403 (unknown user) → unauthorized screen
  *   - /me returned ok                 → render children inside MeContext
  */
-import { useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useIsAuthenticated, useMsal }         from '@azure/msal-react'
 
 import { ApiError }        from '../api/client'
@@ -34,39 +34,57 @@ export default function AuthGate({ children }: AuthGateProps) {
   const [error, setError]                 = useState<ApiError | null>(null)
   const [sessionExpired, setSessionExpired] = useState<boolean>(false)
 
+  const clearAuthError = useCallback(() => {
+    setError(null)
+  }, [])
+
+  const clearMeAndError = useCallback(() => {
+    setMe(null)
+    setError(null)
+  }, [])
+
   // Listen for mid-session 401s from the API client.
   useEffect(() => {
     return onSessionExpired(() => {
-      setMe(null)
-      setError(null)
+      clearMeAndError()
       setSessionExpired(true)
     })
-  }, [])
+  }, [clearMeAndError])
 
   useEffect(() => {
     if (!isAuthed || sessionExpired) {
-      if (!isAuthed) setMe(null)
-      setError(null)
-      return
+      const clearState = !isAuthed ? clearMeAndError : clearAuthError
+      let cancelled = false
+
+      queueMicrotask(() => {
+        if (!cancelled) clearState()
+      })
+
+      return () => { cancelled = true }
     }
 
     let cancelled = false
-    setLoading(true)
-    setError(null)
 
-    getMe()
-      .then(data => {
-        if (!cancelled) setMe(data)
-      })
-      .catch(err => {
-        if (!cancelled) setError(err instanceof ApiError ? err : new ApiError(0, String(err)))
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
+    queueMicrotask(() => {
+      if (cancelled) return
+
+      setLoading(true)
+      setError(null)
+
+      getMe()
+        .then(data => {
+          if (!cancelled) setMe(data)
+        })
+        .catch(err => {
+          if (!cancelled) setError(err instanceof ApiError ? err : new ApiError(0, String(err)))
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false)
+        })
+    })
 
     return () => { cancelled = true }
-  }, [isAuthed, sessionExpired])
+  }, [isAuthed, sessionExpired, clearAuthError, clearMeAndError])
 
   function handleReauth() {
     setSessionExpired(false)

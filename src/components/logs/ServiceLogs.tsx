@@ -3,6 +3,7 @@ import { ChevronRight }         from 'lucide-react'
 
 import { useApi }               from '../../hooks/useApi'
 import { getProjectLogs }       from '../../api/logs'
+import { segmentGitDiffMarkers, toLogDisplayRows } from '../../utils/logTone'
 import RefreshButton            from '../global/RefreshButton'
 import type { ProjectInfo }     from '../../types/project'
 import type { LogStream }       from '../../types/log'
@@ -10,6 +11,12 @@ import type { LogStream }       from '../../types/log'
 
 interface ServiceLogsProps {
   project: ProjectInfo
+}
+
+interface LogSelection {
+  projectKey: string
+  component:  string
+  stream:     LogStream
 }
 
 
@@ -35,15 +42,16 @@ export default function ServiceLogs({ project }: ServiceLogsProps) {
     [project.logs],
   )
 
-  const [component, setComponent] = useState<string>(components[0] ?? '')
-  const [stream, setStream]       = useState<LogStream>('stdout')
+  const [selection, setSelection] = useState<LogSelection>(() => ({
+    projectKey: project.key,
+    component:  components[0] ?? '',
+    stream:     'stdout',
+  }))
   const [open, setOpen]           = useState<boolean>(false)
 
-  // Reset component when the project changes (e.g. user picks a different row).
-  useEffect(() => {
-    setComponent(components[0] ?? '')
-    setStream('stdout')
-  }, [project.key, components])
+  const component = selection.projectKey === project.key && components.includes(selection.component)
+    ? selection.component
+    : (components[0] ?? '')
 
   const streamsAvailable = useMemo(() => {
     if (!project.logs || !component) return { stdout: false, stderr: false }
@@ -55,16 +63,10 @@ export default function ServiceLogs({ project }: ServiceLogsProps) {
     }
   }, [project.logs, component])
 
-  // If the selected stream isn't available for this component, flip to
-  // whichever one IS available so we never leave the user on a dead toggle.
-  useEffect(() => {
-    if (stream === 'stdout' && !streamsAvailable.stdout && streamsAvailable.stderr) {
-      setStream('stderr')
-    }
-    if (stream === 'stderr' && !streamsAvailable.stderr && streamsAvailable.stdout) {
-      setStream('stdout')
-    }
-  }, [stream, streamsAvailable])
+  const requestedStream = selection.projectKey === project.key ? selection.stream : 'stdout'
+  const stream = streamsAvailable[requestedStream]
+    ? requestedStream
+    : (streamsAvailable.stdout ? 'stdout' : 'stderr')
 
   // Only fetch when the section is actually visible — no point hammering
   // the API for logs the user isn't looking at.
@@ -100,6 +102,7 @@ export default function ServiceLogs({ project }: ServiceLogsProps) {
   }
 
   const lines      = data?.lines    ?? []
+  const rows       = toLogDisplayRows(lines)
   const isMissing  = data?.missing  ?? false
   const loggedPath = data?.path
 
@@ -119,7 +122,7 @@ export default function ServiceLogs({ project }: ServiceLogsProps) {
         </span>
         <div className="collapsible-header-right" onClick={e => e.stopPropagation()}>
           <span className="count">
-            {open && data ? `${lines.length} lines` : '—'}
+            {open && data ? `${rows.length} lines` : '—'}
           </span>
           {open && <RefreshButton onClick={refetch} spinning={loading} />}
         </div>
@@ -138,7 +141,11 @@ export default function ServiceLogs({ project }: ServiceLogsProps) {
                     <button
                       key={c}
                       className={`logs-segment ${c === component ? 'is-active' : ''}`}
-                      onClick={() => setComponent(c)}
+                      onClick={() => setSelection({
+                        projectKey: project.key,
+                        component:  c,
+                        stream:     'stdout',
+                      })}
                     >
                       {c}
                     </button>
@@ -152,14 +159,22 @@ export default function ServiceLogs({ project }: ServiceLogsProps) {
               <div className="logs-segmented">
                 <button
                   className={`logs-segment ${stream === 'stdout' ? 'is-active' : ''}`}
-                  onClick={() => setStream('stdout')}
+                  onClick={() => setSelection({
+                    projectKey: project.key,
+                    component,
+                    stream:     'stdout',
+                  })}
                   disabled={!streamsAvailable.stdout}
                 >
                   stdout
                 </button>
                 <button
                   className={`logs-segment ${stream === 'stderr' ? 'is-active' : ''}`}
-                  onClick={() => setStream('stderr')}
+                  onClick={() => setSelection({
+                    projectKey: project.key,
+                    component,
+                    stream:     'stderr',
+                  })}
                   disabled={!streamsAvailable.stderr}
                 >
                   stderr
@@ -186,12 +201,22 @@ export default function ServiceLogs({ project }: ServiceLogsProps) {
               </div>
             )}
 
-            {!error && !isMissing && lines.length > 0 && lines.map((line, i) => (
-              <div key={i} className="logs-row">
-                <span className="logs-row-number">{i + 1}</span>
-                <span className="logs-row-content">{line}</span>
-              </div>
-            ))}
+            {!error && !isMissing && rows.length > 0 && rows.map(row => {
+              const emphasisClass = row.fastForward ? ' has-fast-forward' : ''
+
+              return (
+                <div key={row.key} className={`logs-row is-${row.tone}${emphasisClass}`}>
+                  <span className="logs-row-number">{row.number}</span>
+                  <span className="logs-row-content">
+                    {segmentGitDiffMarkers(row.text).map(segment => (
+                      <span key={segment.key} className={`log-text-${segment.kind}`}>
+                        {segment.text}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+              )
+            })}
           </div>
 
           {loggedPath && (

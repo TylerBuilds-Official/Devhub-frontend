@@ -20,7 +20,7 @@
 .deploy-modal {
   background:    var(--bg-elevated);
   border:        1px solid var(--border-strong);
-  width:         560px;
+  width:         760px;
   max-width:     calc(100vw - 40px);
   max-height:    calc(100vh - 40px);
   display:       flex;
@@ -330,32 +330,165 @@
 
 /* Log tail — mono pre, scrolling box */
 
+@keyframes log-ambient-breathe {
+  0% {
+    transform: translate3d(10%, -6%, 0) scale(0.98);
+    opacity:   0.22;
+  }
+  50% {
+    transform: translate3d(-5%, 4%, 0) scale(1.03);
+    opacity:   0.34;
+  }
+  100% {
+    transform: translate3d(4%, 8%, 0) scale(1);
+    opacity:   0.26;
+  }
+}
+
 .deploy-log-tail {
-  background:   var(--bg-base);
+  position:     relative;
+  isolation:    isolate;
+  background:   #080808;
   border:       1px solid var(--border-default);
-  padding:      10px 12px;
+  border-left:  2px solid var(--border-strong);
   font-family:  var(--font-mono);
   font-size:    11px;
-  line-height:  1.6;
+  line-height:  1.55;
   color:        var(--text-secondary);
   height:       220px;
   overflow-y:   auto;
+  white-space:  pre;
+  padding:      8px 0;
+  transition:   border-color 160ms linear, filter 160ms linear;
+}
+
+.deploy-log-tail::before,
+.deploy-log-tail::after {
+  content:        "";
+  position:       absolute;
+  pointer-events: none;
+  z-index:        -1;
+}
+
+.deploy-log-tail::before {
+  width:      72%;
+  height:     145%;
+  top:        -24%;
+  right:      -18%;
+  background:
+    radial-gradient(circle at 34% 30%, rgba(122, 155, 62, 0.08), transparent 29%),
+    radial-gradient(circle at 72% 58%, rgba(193, 48, 48, 0.06), transparent 36%),
+    radial-gradient(circle at 48% 84%, rgba(201, 74, 26, 0.05), transparent 40%);
+  filter:     blur(24px);
+  animation:  log-ambient-breathe 14s ease-in-out infinite alternate;
+}
+
+.deploy-log-tail::after {
+  inset:       0;
+  background:  repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.011) 0, rgba(255, 255, 255, 0.011) 1px, transparent 1px, transparent 5px);
+  mix-blend-mode: screen;
+  opacity:     0.7;
+}
+
+.deploy-log-tail:hover,
+.deploy-log-tail:focus-within {
+  border-left-color:  var(--accent-rule);
+  filter:             saturate(1.06);
+}
+
+.deploy-log-tail:hover::before,
+.deploy-log-tail:focus-within::before {
+  opacity: 0.42;
+}
+
+.deploy-log-empty {
+  display:    block;
+  color:      var(--text-muted);
+  font-style: italic;
+  padding:    12px 14px;
+}
+
+.deploy-log-line {
+  position:              relative;
+  z-index:               1;
+  display:               grid;
+  grid-template-columns:  48px minmax(0, 1fr);
+  gap:                   10px;
+  min-height:            19px;
+  padding:               1px 12px 1px 0;
+  color:                 var(--text-secondary);
+  border-left:           2px solid transparent;
+}
+
+.deploy-log-line:hover {
+  background: rgba(255, 255, 255, 0.026);
+  box-shadow: inset 0 0 12px rgba(201, 74, 26, 0.02);
+}
+
+.deploy-log-line-number {
+  color:         var(--text-dim);
+  text-align:    right;
+  user-select:   none;
+  padding-right: 8px;
+  border-right:  1px solid var(--border-subtle);
+}
+
+.deploy-log-line-content {
+  color:        inherit;
   white-space:  pre-wrap;
   word-break:   break-word;
 }
 
-.deploy-log-empty {
-  color:      var(--text-dim);
-  font-style: italic;
-}
-
-.deploy-log-line {
-  display: block;
-  color:   var(--text-secondary);
-}
-
-.deploy-log-line:last-child {
+.deploy-log-line:last-child .deploy-log-line-content {
   color: var(--text-primary);
+}
+
+.deploy-log-line.is-info {
+  color: var(--text-primary);
+}
+
+.deploy-log-line.is-success {
+  color:             var(--status-up);
+  background:        var(--status-up-soft);
+  border-left-color: var(--status-up);
+}
+
+.deploy-log-line.is-warning {
+  color:             var(--status-degraded);
+  background:        var(--status-degraded-soft);
+  border-left-color: var(--status-degraded);
+}
+
+.deploy-log-line.is-error {
+  color:             var(--status-down);
+  background:        var(--status-down-soft);
+  border-left-color: var(--status-down);
+}
+
+.deploy-log-line.is-muted {
+  color: var(--text-secondary);
+}
+
+.deploy-log-line.has-fast-forward .deploy-log-line-content {
+  color:       var(--text-primary);
+  font-weight: 700;
+}
+
+.log-text-addition {
+  color:       var(--status-up);
+  font-weight: 700;
+}
+
+.log-text-deletion {
+  color:       var(--status-down);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deploy-log-tail::before,
+  .deploy-log-tail::after {
+    animation: none;
+  }
 }
 
 

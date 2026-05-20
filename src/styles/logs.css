@@ -71,16 +71,59 @@
 /* ── Log viewport — terminal-black, not --bg-base ──────────────────────── */
 
 .logs-viewport {
-  background:    #080808;
-  border:        1px solid var(--border-default);
-  font-family:   var(--font-mono);
-  font-size:     11px;
-  line-height:   1.55;
-  color:         var(--text-secondary);
-  height:        260px;
-  overflow-y:    auto;
-  white-space:   pre;
-  padding:       8px 0;
+  position:     relative;
+  isolation:    isolate;
+  background:   #080808;
+  border:       1px solid var(--border-default);
+  border-left:  2px solid var(--border-strong);
+  font-family:  var(--font-mono);
+  font-size:    11px;
+  line-height:  1.55;
+  color:        var(--text-secondary);
+  height:       260px;
+  overflow-y:   auto;
+  white-space:  pre;
+  padding:      8px 0;
+  transition:   border-color 160ms linear, filter 160ms linear;
+}
+
+.logs-viewport::before,
+.logs-viewport::after {
+  content:        "";
+  position:       absolute;
+  pointer-events: none;
+  z-index:        -1;
+}
+
+.logs-viewport::before {
+  width:      72%;
+  height:     145%;
+  top:        -24%;
+  right:      -18%;
+  background:
+    radial-gradient(circle at 34% 30%, rgba(122, 155, 62, 0.08), transparent 29%),
+    radial-gradient(circle at 72% 58%, rgba(193, 48, 48, 0.06), transparent 36%),
+    radial-gradient(circle at 48% 84%, rgba(201, 74, 26, 0.05), transparent 40%);
+  filter:     blur(24px);
+  animation:  log-ambient-breathe 14s ease-in-out infinite alternate;
+}
+
+.logs-viewport::after {
+  inset:       0;
+  background:  repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.011) 0, rgba(255, 255, 255, 0.011) 1px, transparent 1px, transparent 5px);
+  mix-blend-mode: screen;
+  opacity:     0.7;
+}
+
+.logs-viewport:hover,
+.logs-viewport:focus-within {
+  border-left-color:  var(--accent-rule);
+  filter:             saturate(1.06);
+}
+
+.logs-viewport:hover::before,
+.logs-viewport:focus-within::before {
+  opacity: 0.42;
 }
 
 .logs-empty {
@@ -97,10 +140,19 @@
 }
 
 .logs-row {
+  position:        relative;
+  z-index:         1;
   display:         grid;
   grid-template-columns: 52px 1fr;
   gap:             12px;
-  padding:         0 12px 0 0;
+  min-height:      19px;
+  padding:         1px 12px 1px 0;
+  border-left:     2px solid transparent;
+}
+
+.logs-row:hover {
+  background: rgba(255, 255, 255, 0.026);
+  box-shadow: inset 0 0 12px rgba(201, 74, 26, 0.02);
 }
 
 .logs-row-number {
@@ -112,13 +164,47 @@
 }
 
 .logs-row-content {
-  color:        var(--text-primary);
+  color:        inherit;
   white-space:  pre-wrap;
   word-break:   break-word;
 }
 
-.logs-row:hover .logs-row-content {
-  color: var(--accent-hover);
+.logs-row.is-info {
+  color: var(--text-primary);
+}
+
+.logs-row.is-success {
+  color:             var(--status-up);
+  background:        var(--status-up-soft);
+  border-left-color: var(--status-up);
+}
+
+.logs-row.is-warning {
+  color:             var(--status-degraded);
+  background:        var(--status-degraded-soft);
+  border-left-color: var(--status-degraded);
+}
+
+.logs-row.is-error {
+  color:             var(--status-down);
+  background:        var(--status-down-soft);
+  border-left-color: var(--status-down);
+}
+
+.logs-row.is-muted {
+  color: var(--text-secondary);
+}
+
+.logs-row.has-fast-forward .logs-row-content {
+  color:       var(--text-primary);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logs-viewport::before,
+  .logs-viewport::after {
+    animation: none;
+  }
 }
 
 .logs-footer-path {

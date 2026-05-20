@@ -9,9 +9,7 @@
  * dismissable by click, and stack in the bottom-right corner.
  */
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -20,8 +18,7 @@ import {
 } from 'react'
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react'
 
-
-export type ToastKind = 'success' | 'error' | 'info'
+import { ToastContext, type ToastApi, type ToastKind } from './toastContext'
 
 
 interface Toast {
@@ -30,17 +27,6 @@ interface Toast {
   message:   string
   duration:  number    // ms; 0 = sticky
 }
-
-
-interface ToastApi {
-  success: (message: string, durationMs?: number) => void
-  error:   (message: string, durationMs?: number) => void
-  info:    (message: string, durationMs?: number) => void
-  dismiss: (id: number) => void
-}
-
-
-const ToastContext = createContext<ToastApi | null>(null)
 
 
 const DEFAULT_DURATION: Record<ToastKind, number> = {
@@ -77,13 +63,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <ToastViewport toasts={toasts} onDismiss={dismiss} />
     </ToastContext.Provider>
   )
-}
-
-
-export function useToast(): ToastApi {
-  const api = useContext(ToastContext)
-  if (!api) throw new Error('useToast() called outside <ToastProvider>')
-  return api
 }
 
 
